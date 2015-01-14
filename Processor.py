@@ -31,9 +31,14 @@ def load(inputFilePath):
 	    	
 	return cardsList, creditsList, chargesList
 
+#this function goes through the chargesList and charges the proper cards.
 def chargeAccounts(chargesList, cardsList):
 	for i in range(len(chargesList)):
-		print chargesList[i]
+		
+		currentCard = chargesList[i][1]
+		amountDue = int(chargesList[i][2][1:])
+		print currentCard, amountDue
+
 
 def creditAccounts(creditsList, cardsList):
 	for i in range(len(chargesList)):
@@ -42,7 +47,6 @@ def creditAccounts(creditsList, cardsList):
 def main():
 	inputFilePath = sys.argv[1]
 	cardsList, creditsList, chargesList = load(inputFilePath)
-	print cardsList[0].fName
 	chargeAccounts(chargesList, cardsList)
 
 main()
