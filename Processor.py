@@ -37,12 +37,14 @@ def chargeAccounts(chargesList, cardsList):
 		
 		currentCard = chargesList[i][1]
 		amountDue = int(chargesList[i][2][1:])
-		print currentCard, amountDue
+		print currentCard, amountDue, currentCard.currentBalance
 
 
 def creditAccounts(creditsList, cardsList):
 	for i in range(len(chargesList)):
-		print chargesList[i]
+		currentCard = chargesList[i][1]
+		amountOwed = int(creditsList[i][2][1:])
+		print currentCard, amountOwed
 
 def main():
 	inputFilePath = sys.argv[1]
