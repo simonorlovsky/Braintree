@@ -15,40 +15,64 @@ def load(inputFilePath):
 	    print >>sys.stderr, 'Cannot open', inputFilePath
 	    exit()
 
-	cardsList = []
-	creditsList = []
-	chargesList = []
+	processes = []
+
 	for line in inputFile:
 	    currentLine = line.split(" ")
-	    # Want to make sure that I get everything into the right place
-	    if currentLine[0]== "Add":
-	    	newCard = CreditCard(currentLine[1], currentLine[2], currentLine[3])
-	    	cardsList.append(newCard)
-	    elif currentLine[0]== "Charge":
-	    	chargesList.append(currentLine)
-	    else:
-	    	creditsList.append(currentLine)
+	    processes.append(currentLine)
 	    	
-	return cardsList, creditsList, chargesList
+	return processes
+
+#luhn test
+def luhn(n):
+	r = [int(ch) for ch in str(n)][::-1]
+	return (sum(r[0::2]) + sum(sum(divmod(d*2,10)) for d in r[1::2])) % 10 == 0
 
 #this function goes through the chargesList and charges the proper cards.
-def chargeAccounts(chargesList, cardsList):
-	for i in range(len(chargesList)):
-		
-		currentCard = chargesList[i][1]
-		amountDue = int(chargesList[i][2][1:])
-		print currentCard, amountDue, currentCard.currentBalance
+def process(processes):
+	cardsList = []
+	for i in range(len(processes)):
+		if processes[i][0]== "Add":
+			newCard = CreditCard(processes[i][1], processes[i][2], processes[i][3])
+			if luhn(newCard.cNumber)== False:
+				newCard.currentBalance = "error"
+			cardsList.append(newCard)
 
+		elif processes[i][0]== "Charge":
+			personToCharge = processes[i][1]
+			amountToCharge = processes[i][2][1:]
 
-def creditAccounts(creditsList, cardsList):
-	for i in range(len(chargesList)):
-		currentCard = chargesList[i][1]
-		amountOwed = int(creditsList[i][2][1:])
-		print currentCard, amountOwed
+			for j in range(len(cardsList)):
+				if cardsList[j].fName == personToCharge:
+					#Checking to see if card has enough credit for transaction
+					if cardsList[j].cLimit> cardsList[j].currentBalance + int(amountToCharge) and cardsList[j].currentBalance!="error":
+						cardsList[j].charge(amountToCharge)
+						print "Charged", cardsList[j].fName, amountToCharge
+					else:
+						#card declined
+						print "declined"
+						
+
+		elif processes[i][0]== "Credit":
+			personToCredit = processes[i][1]
+			amountToCredit = processes[i][2][1:]
+
+			for j in range(len(cardsList)):
+				if cardsList[j].fName == personToCredit and cardsList[j].currentBalance!="error":
+					cardsList[j].credit(amountToCredit)
+					print "Credited", cardsList[j].fName, amountToCredit
+
+	return cardsList
+		# amountDue = int(chargesList[i][2][1:])
+	# for i in range(len(cardsList)):
+	# 	print cardsList[i].fName
+
 
 def main():
 	inputFilePath = sys.argv[1]
-	cardsList, creditsList, chargesList = load(inputFilePath)
-	chargeAccounts(chargesList, cardsList)
+	processes = load(inputFilePath)
+	cardsList = process(processes)
+	for i in range(len(cardsList)):
+		print cardsList[i].fName,":", cardsList[i].currentBalance
 
 main()

@@ -9,11 +9,11 @@ class CreditCard:
 	def __init__(self, firstName, cardNumber, creditLimit):
 		self.fName = firstName
 		self.cNumber = cardNumber
-		self.cLimit = creditLimit
+		self.cLimit = int(creditLimit[1:])
 		self.currentBalance = 0
 
-	def charge(amountDue):
-		self.currentBalance -= amountDue
+	def charge(self, amountDue):
+		self.currentBalance = self.currentBalance+int(amountDue)
 
-	def credit(amountOwed):
-		self.currentBalance += amountOwed
+	def credit(self, amountOwed):
+		self.currentBalance = self.currentBalance-int(amountOwed)
