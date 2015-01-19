@@ -28,19 +28,41 @@ def luhn(n):
 	r = [int(ch) for ch in str(n)][::-1]
 	return (sum(r[0::2]) + sum(sum(divmod(d*2,10)) for d in r[1::2])) % 10 == 0
 
+def merge(A,B):
+    if len(A) == 0:
+        return B
+    elif len(B) == 0:
+        return A
+    elif A[0].fName < B[0].fName:
+        return [A[0]] + merge(A[1:],B)
+    else:
+        return [B[0]] + merge(A,B[1:])
+
+def mergeSort(L):
+    if len(L) <= 1:
+        return L
+    else:
+        left = mergeSort(L[0:len(L)/2])
+        right = mergeSort(L[len(L)/2:])
+        return merge(left,right)
+
 #this function goes through the chargesList and charges the proper cards.
 def process(processes):
 	cardsList = []
+	cards = {}
 	for i in range(len(processes)):
 		if processes[i][0]== "Add":
 			newCard = CreditCard(processes[i][1], processes[i][2], processes[i][3])
 			if luhn(newCard.cNumber)== False:
 				newCard.currentBalance = "error"
 			cardsList.append(newCard)
+			cards[newCard.fName] = newCard
 
 		elif processes[i][0]== "Charge":
 			personToCharge = processes[i][1]
 			amountToCharge = processes[i][2][1:]
+
+			cards[personToCharge]
 
 			for j in range(len(cardsList)):
 				if cardsList[j].fName == personToCharge:
@@ -63,15 +85,14 @@ def process(processes):
 					print "Credited", cardsList[j].fName, amountToCredit
 
 	return cardsList
-		# amountDue = int(chargesList[i][2][1:])
-	# for i in range(len(cardsList)):
-	# 	print cardsList[i].fName
+
 
 
 def main():
 	inputFilePath = sys.argv[1]
 	processes = load(inputFilePath)
 	cardsList = process(processes)
+	cardsList = mergeSort(cardsList)
 	for i in range(len(cardsList)):
 		print cardsList[i].fName,":", cardsList[i].currentBalance
 
