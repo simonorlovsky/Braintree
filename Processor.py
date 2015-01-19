@@ -8,17 +8,19 @@
 import sys
 from CreditCard import CreditCard
 
+
+#Load function: Goes through space delimited input and creates list of processes
 def load(inputFilePath):
 	try:
 	    inputFile = open(inputFilePath)
 	except Exception, e:
-	    print >>sys.stderr, 'Cannot open', inputFilePath
+	    print >>sys.stderr, 'Cannot open', inputFilePath #if the file isn't real through error
 	    exit()
 
 	processes = []
 
 	for line in inputFile:
-	    currentLine = line.split(" ")
+	    currentLine = line.split(" ") 
 	    processes.append(currentLine)
 	    	
 	return processes
@@ -28,6 +30,7 @@ def luhn(n):
 	r = [int(ch) for ch in str(n)][::-1]
 	return (sum(r[0::2]) + sum(sum(divmod(d*2,10)) for d in r[1::2])) % 10 == 0
 
+#using mergesort because it is O(n log n)
 def merge(A,B):
     if len(A) == 0:
         return B
@@ -46,54 +49,52 @@ def mergeSort(L):
         right = mergeSort(L[len(L)/2:])
         return merge(left,right)
 
-#this function goes through the chargesList and charges the proper cards.
+#this function goes through all of the processes and makes them all happen
 def process(processes):
-	cardsList = []
+	#we're using a dictionary to take advantage of the O(1) look up rather than using a list
 	cards = {}
 	for i in range(len(processes)):
 		if processes[i][0]== "Add":
-			newCard = CreditCard(processes[i][1], processes[i][2], processes[i][3])
+			newCard = CreditCard(processes[i][1], processes[i][2], processes[i][3]) #instantiation of new card
 			if luhn(newCard.cNumber)== False:
 				newCard.currentBalance = "error"
-			cardsList.append(newCard)
 			cards[newCard.fName] = newCard
 
-		elif processes[i][0]== "Charge":
-			personToCharge = processes[i][1]
+		elif processes[i][0]== "Charge": #charging the card we need to charge
+			personToCharge = cards[processes[i][1]]
 			amountToCharge = processes[i][2][1:]
-
-			cards[personToCharge]
-
-			for j in range(len(cardsList)):
-				if cardsList[j].fName == personToCharge:
-					#Checking to see if card has enough credit for transaction
-					if cardsList[j].cLimit> cardsList[j].currentBalance + int(amountToCharge) and cardsList[j].currentBalance!="error":
-						cardsList[j].charge(amountToCharge)
-						print "Charged", cardsList[j].fName, amountToCharge
-					else:
-						#card declined
-						print "declined"
+			if personToCharge.cLimit> personToCharge.currentBalance + int(amountToCharge) and personToCharge.currentBalance!="error": 
+				#making sure that there is enough credit and the card is valid
+				personToCharge.charge(amountToCharge)
 						
 
-		elif processes[i][0]== "Credit":
-			personToCredit = processes[i][1]
+		elif processes[i][0]== "Credit": #crediting the card we need to credit
+			personToCredit = cards[processes[i][1]]
 			amountToCredit = processes[i][2][1:]
+			if personToCredit.currentBalance!="error": #making sure card passed the lun test
+				personToCredit.credit(amountToCredit)
 
-			for j in range(len(cardsList)):
-				if cardsList[j].fName == personToCredit and cardsList[j].currentBalance!="error":
-					cardsList[j].credit(amountToCredit)
-					print "Credited", cardsList[j].fName, amountToCredit
-
-	return cardsList
-
+	return cards
 
 
 def main():
-	inputFilePath = sys.argv[1]
-	processes = load(inputFilePath)
-	cardsList = process(processes)
-	cardsList = mergeSort(cardsList)
-	for i in range(len(cardsList)):
-		print cardsList[i].fName,":", cardsList[i].currentBalance
+	if sys.argv[1:].__len__()==0: #checking to make sure that the user is properly inputting commandline arguments
+		print 'Usage: Processor.py <inputfile>' 
+
+	else:
+		inputFilePath = sys.argv[1]
+		processes = load(inputFilePath)
+		cardsList = process(processes)
+
+		cardsToSort = []
+
+		for i, v in enumerate(cardsList): #moving everything from the dictionary to the list so it's easier to iterate over
+			cardsToSort.append(cardsList[v])
+
+		cardsList = mergeSort(cardsToSort)
+		f = open('output.txt', 'w')
+		for i in range(len(cardsList)):
+			print cardsList[i].fName+": "+ str(cardsList[i].currentBalance) #printing output
+			f.write(cardsList[i].fName+": "+ str(cardsList[i].currentBalance)+ '\n')
 
 main()

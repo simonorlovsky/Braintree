@@ -8,3 +8,5 @@ Charge Tom $800
 Charge Lisa $7
 Credit Lisa $100
 Credit Quincy $200
+Charge Jeff $100
+Add Aulo 1111 $200

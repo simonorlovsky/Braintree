@@ -1,0 +1,6 @@
+Aulo: error
+Jeff: 100
+Lisa: -93
+Oksana: error
+Quincy: error
+Tom: 500
